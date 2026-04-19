@@ -1,0 +1,6 @@
+# Claude Code
+.claude/settings.local.json
+
+# Editor and OS
+*.bak
+.DS_Store
