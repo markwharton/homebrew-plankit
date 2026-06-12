@@ -1,28 +1,28 @@
 class McpBridge < Formula
   desc "Stdio-to-HTTP bridge for MCP servers. Single Go binary, zero dependencies"
   homepage "https://plankit.com/mcp-bridge/"
-  version "0.2.0"
+  version "0.2.1"
   license "MIT"
 
   on_macos do
     on_arm do
       url "https://github.com/markwharton/mcp-bridge/releases/download/v#{version}/mcp-bridge-darwin-arm64"
-      sha256 "556758e71ed7fba5f00081c7960ec2d8cf809de479016fa9312eff238bc6dffd"
+      sha256 "0928382d504e0650cd9064e16157e5566ce5bf150546d939cfcd0d95f2815f4f"
     end
     on_intel do
       url "https://github.com/markwharton/mcp-bridge/releases/download/v#{version}/mcp-bridge-darwin-amd64"
-      sha256 "67aa9fe1e542fe6c5b065e001b1f622eece9c6ba145e0b23ef3d61c0f1193984"
+      sha256 "5ec3c40653c69767b414ab98da524fe81176c64a1260ce0a47371358d747fd5d"
     end
   end
 
   on_linux do
     on_arm do
       url "https://github.com/markwharton/mcp-bridge/releases/download/v#{version}/mcp-bridge-linux-arm64"
-      sha256 "1c0383851f84471b9b0af9707f30b6ad0aa424f1276034006874afda3dd9573b"
+      sha256 "715e433adf2373054179e0b32fddf40d850586a098d3b5ae81f9b28c1f5919d7"
     end
     on_intel do
       url "https://github.com/markwharton/mcp-bridge/releases/download/v#{version}/mcp-bridge-linux-amd64"
-      sha256 "3d9f80d158bd01012ffb3871151476b072a4fc9e62e47c674a61ac3d64fb9a90"
+      sha256 "f81c11ad88cf51c27b3357cb09225fdaf6cdc13f6e6871076b2f22fcbfa77724"
     end
   end
 
