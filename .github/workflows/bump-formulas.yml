@@ -61,5 +61,5 @@ jobs:
 
             `version` and all four `sha256` values taken from the release `checksums.txt`.
             Smoke-tested on macOS (arm64) in [this run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}): install → `--version` → `brew test` → `brew audit --new`.
-            Merging triggers the full macOS + Linux test workflow on `develop` (auto-bump PRs can't trigger it directly — GITHUB_TOKEN events don't start workflows).
+            Merging triggers the four-platform test workflow on `develop` (auto-bump PRs can't trigger it directly — GITHUB_TOKEN events don't start workflows).
           delete-branch: true
