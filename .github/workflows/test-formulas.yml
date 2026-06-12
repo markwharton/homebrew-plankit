@@ -1,0 +1,35 @@
+name: Test formulas
+
+on:
+  push:
+    branches: [develop, main]
+    paths:
+      - "Formula/**"
+  pull_request:
+    paths:
+      - "Formula/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v6
+      - name: Install Homebrew (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          if ! command -v brew >/dev/null 2>&1 && [ ! -x /home/linuxbrew/.linuxbrew/bin/brew ]; then
+            NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+          fi
+      - name: Smoke test formulas
+        run: |
+          for formula in $(ruby -ryaml -e 'puts YAML.load_file("formulas.yml").fetch("formulas").map { |f| f.fetch("formula") }'); do
+            scripts/test-formula.sh "$formula"
+          done

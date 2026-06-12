@@ -1,0 +1,65 @@
+name: Bump formulas
+
+on:
+  schedule:
+    - cron: "23 5 * * *"
+  repository_dispatch:
+    types: [bump-formula]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: bump-formulas
+  cancel-in-progress: false
+
+jobs:
+  discover:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.list.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: develop
+      - name: Read formulas.yml
+        id: list
+        run: |
+          echo "matrix=$(ruby -ryaml -rjson -e 'puts({ include: YAML.load_file("formulas.yml").fetch("formulas") }.to_json)')" >> "$GITHUB_OUTPUT"
+
+  bump:
+    needs: discover
+    runs-on: macos-latest
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.discover.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: develop
+      - name: Bump ${{ matrix.formula }} to latest release
+        id: bump
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: ruby scripts/bump-formula.rb "${{ matrix.formula }}"
+      - name: Smoke test
+        if: steps.bump.outputs.updated == 'true'
+        run: scripts/test-formula.sh "${{ matrix.formula }}"
+      - name: Open bump PR
+        if: steps.bump.outputs.updated == 'true'
+        uses: peter-evans/create-pull-request@v7
+        with:
+          base: develop
+          branch: bump/${{ matrix.formula }}
+          add-paths: Formula/${{ matrix.formula }}.rb
+          commit-message: "chore: bump ${{ matrix.formula }} to v${{ steps.bump.outputs.version }}"
+          title: "chore: bump ${{ matrix.formula }} to v${{ steps.bump.outputs.version }}"
+          body: |
+            Automated bump of `${{ matrix.formula }}` to [v${{ steps.bump.outputs.version }}](https://github.com/${{ matrix.repo }}/releases/tag/v${{ steps.bump.outputs.version }}).
+
+            `version` and all four `sha256` values taken from the release `checksums.txt`.
+            Smoke-tested on macOS (arm64) in [this run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}): install → `--version` → `brew test` → `brew audit --new`.
+            Merging triggers the full macOS + Linux test workflow on `develop` (auto-bump PRs can't trigger it directly — GITHUB_TOKEN events don't start workflows).
+          delete-branch: true

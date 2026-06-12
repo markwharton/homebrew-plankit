@@ -1,0 +1,10 @@
+# Registry of formulas tracked by CI (see .github/workflows/ and scripts/).
+# Each entry: the Formula file name, the upstream GitHub repo releases are
+# pulled from, and the prefix of its release assets (<prefix>-<os>-<arch>).
+formulas:
+  - formula: pk
+    repo: markwharton/plankit
+    asset_prefix: pk
+  - formula: mcp-bridge
+    repo: markwharton/mcp-bridge
+    asset_prefix: mcp-bridge

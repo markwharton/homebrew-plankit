@@ -25,7 +25,8 @@ IMPORTANT: Follow these rules at all times.
 
 ### Bumping a Formula
 
-- Update both `version` and the four `sha256` values per Formula.
+- Preferred: `ruby scripts/bump-formula.rb [<formula>]` — updates `version` and the four `sha256` values from the latest upstream release (CI runs the same script daily; see CI/CD).
+- Manual fallback: update both `version` and the four `sha256` values per Formula.
 - Fetch checksums from the upstream release's `checksums.txt`:
   - `curl -sL https://github.com/markwharton/plankit/releases/download/vX.Y.Z/checksums.txt`
   - `curl -sL https://github.com/markwharton/mcp-bridge/releases/download/vX.Y.Z/checksums.txt`
@@ -52,5 +53,9 @@ IMPORTANT: Follow these rules at all times.
 
 ### CI/CD
 
-- No `.github/workflows/` present — all verification is local via `brew install --build-from-source` + `brew test` + `brew audit --new`.
-- No Dependabot configuration (no Actions to update).
+- `formulas.yml` is the registry of tracked formulas (formula name, upstream repo, asset prefix) — new formulas must be added there for CI to cover them.
+- `.github/workflows/test-formulas.yml` — runs `scripts/test-formula.sh <formula>` (install → `--version` → `brew test` → `brew audit --new` → uninstall) for every registered formula on macOS and Linux, for pushes/PRs touching `Formula/**`.
+- `.github/workflows/bump-formulas.yml` — daily schedule, `repository_dispatch` (type `bump-formula`), or manual dispatch. Runs `scripts/bump-formula.rb` per formula, smoke-tests on macOS, opens a bump PR against `develop`.
+- Auto-bump PRs use the default `GITHUB_TOKEN`, which cannot trigger other workflows — that's why the bump workflow smoke-tests before opening the PR; the full two-OS test runs when the merge lands on `develop`.
+- Scheduled/dispatch triggers only fire from the default branch (`main`) — automation activates once these workflows are released.
+- Dependabot keeps GitHub Actions versions current (`.github/dependabot.yml`).
