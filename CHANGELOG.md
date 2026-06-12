@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [v0.2.0] - 2026-06-12
+
+### Added
+
+- add CI to bump and test formulas automatically (22871d7)
+- test all four release platforms in CI (98af2ee)
+
+### Documentation
+
+- document upstream dispatch setup for new formulas (b54078b)
+
+### Maintenance
+
+- bump mcp-bridge to v0.2.0 (009da40)
+- bump pk to v0.24.0 (8f91121)
+- update pk-managed files for v0.24.0 (42d83f2)
+
 ## [v0.1.0] - 2026-04-19
 
 ### Added
@@ -17,3 +34,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - add pk scaffolding and project conventions (5644b82)
 
 [v0.1.0]: https://github.com/markwharton/homebrew-plankit/compare/v0.0.0...v0.1.0
+[v0.2.0]: https://github.com/markwharton/homebrew-plankit/compare/v0.1.0...v0.2.0
