@@ -85,6 +85,18 @@ For instant bumps instead of the daily check, upstream repos ping this repo on r
 
 `plankit` and `mcp-bridge` are set up this way already.
 
+### Merging bump PRs
+
+Always **squash-merge** bump PRs (and Dependabot PRs), then rebase local work on top before shipping:
+
+```bash
+gh pr merge <number> --squash --delete-branch
+git pull --rebase   # replays any unpushed local commits on top of the merge
+pk changelog && pk release   # or /ship
+```
+
+Why squash: the PR title is a conventional commit (`chore: bump <formula> to vX.Y.Z`), so a squash lands exactly one changelog-ready commit on `develop`. A regular merge adds a non-conventional `Merge pull request #N` commit — `pk changelog` skips those, so mixing merge styles produces releases where some bumps appear in the changelog and some don't.
+
 ## Adding a formula
 
 1. Write `Formula/<name>.rb` (copy an existing one).

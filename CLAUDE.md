@@ -45,6 +45,7 @@ IMPORTANT: Follow these rules at all times.
 - **Development branch:** `develop`.
 - **Protected branch:** `main` — `pk guard` blocks direct commits. Never commit directly to `main`.
 - **Release:** `pk release` merges `develop` into `main` before pushing.
+- **Bump/Dependabot PRs: always squash-merge** (`gh pr merge --squash --delete-branch`), then `git pull --rebase` before shipping. Squashing lands the PR's conventional-commit title as one commit so `pk changelog` picks it up; a regular merge commit is non-conventional and silently drops the bump from the changelog.
 
 ### Commit Style
 
