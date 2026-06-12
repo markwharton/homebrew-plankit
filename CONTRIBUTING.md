@@ -61,21 +61,35 @@ Both scripts run locally too. `scripts/test-formula.sh` expects to own the tap s
 
 Auto-bump PRs are opened with the default `GITHUB_TOKEN`, which GitHub doesn't allow to trigger other workflows — the bump workflow smoke-tests before opening the PR, and the full four-platform test workflow runs when the merge pushes to `develop`. Scheduled and dispatch triggers fire from the default branch (`main`), so automation goes live once the workflows are released.
 
-For instant bumps instead of the daily check, add a notify step at the end of an upstream repo's release workflow (requires a fine-grained PAT scoped to this repo with contents read/write, stored as `TAP_DISPATCH_TOKEN` in the upstream repo):
+For instant bumps instead of the daily check, upstream repos ping this repo on release. The pieces:
 
-```yaml
-- name: Notify Homebrew tap
-  run: |
-    curl -fsS -X POST \
-      -H "Authorization: Bearer ${{ secrets.TAP_DISPATCH_TOKEN }}" \
-      -H "Accept: application/vnd.github+json" \
-      https://api.github.com/repos/markwharton/homebrew-plankit/dispatches \
-      -d '{"event_type":"bump-formula"}'
-```
+- **One shared fine-grained PAT** (`homebrew-plankit-dispatch`): repository access "Only select repositories" → this repo only; permissions Contents: Read and write. The token targets *this* repo, so adding a new upstream repo never requires changing the token. GitHub won't show the value again after creation — keep it in a password manager, or regenerate it and re-set the secret in every upstream repo when onboarding the next one.
+- **The secret** in each upstream repo (prompts for the token; never put it on the command line or in a file):
+
+  ```bash
+  gh secret set TAP_DISPATCH_TOKEN --repo markwharton/<upstream-repo>
+  ```
+
+- **The notify step** at the end of the upstream release workflow's `release` job, after the GitHub release is created (`continue-on-error` so a failed ping never fails the release — the daily check is the fallback):
+
+  ```yaml
+  - name: Notify Homebrew tap
+    continue-on-error: true
+    run: |
+      curl -fsS -X POST \
+        -H "Authorization: Bearer ${{ secrets.TAP_DISPATCH_TOKEN }}" \
+        -H "Accept: application/vnd.github+json" \
+        https://api.github.com/repos/markwharton/homebrew-plankit/dispatches \
+        -d '{"event_type":"bump-formula"}'
+  ```
+
+`plankit` and `mcp-bridge` are set up this way already.
 
 ## Adding a formula
 
-Write `Formula/<name>.rb` (copy an existing one), then register it in `formulas.yml` so CI bumps and tests it.
+1. Write `Formula/<name>.rb` (copy an existing one).
+2. Register it in `formulas.yml` (formula name, upstream repo, asset prefix) so CI bumps and tests it.
+3. Optional, for instant bumps: set the `TAP_DISPATCH_TOKEN` secret in the upstream repo and add the notify step to its release workflow (see Automation above). Without this the daily check still covers it.
 
 ## Notes
 
