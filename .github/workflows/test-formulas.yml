@@ -5,9 +5,15 @@ on:
     branches: [develop, main]
     paths:
       - "Formula/**"
+      - "formulas.yml"
+      - "scripts/**"
+      - ".github/workflows/test-formulas.yml"
   pull_request:
     paths:
       - "Formula/**"
+      - "formulas.yml"
+      - "scripts/**"
+      - ".github/workflows/test-formulas.yml"
   workflow_dispatch:
 
 permissions:

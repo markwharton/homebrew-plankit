@@ -55,7 +55,7 @@ rm /opt/homebrew/Library/Taps/markwharton/homebrew-plankit
 `formulas.yml` registers every formula CI tracks (formula name, upstream repo, asset prefix). Two workflows consume it:
 
 - **`bump-formulas.yml`** — daily (and on `repository_dispatch` type `bump-formula`, or manually from the Actions tab) runs `scripts/bump-formula.rb` per formula; if upstream has a newer release it rewrites `version` + the four `sha256` values, smoke-tests on macOS, and opens a PR against `develop`.
-- **`test-formulas.yml`** — runs `scripts/test-formula.sh <formula>` for every formula when `Formula/**` changes (push or PR), on one runner per release artifact: macOS arm64 (`macos-latest`), macOS Intel (`macos-15-intel`), Linux amd64 (`ubuntu-latest`), and Linux arm64 (`ubuntu-24.04-arm`) — every published binary actually gets executed.
+- **`test-formulas.yml`** — runs `scripts/test-formula.sh <formula>` for every formula when `Formula/**` or the test tooling changes (push or PR), on one runner per release artifact: macOS arm64 (`macos-latest`), macOS Intel (`macos-15-intel`), Linux amd64 (`ubuntu-latest`), and Linux arm64 (`ubuntu-24.04-arm`) — every published binary actually gets executed.
 
 Both scripts run locally too. `scripts/test-formula.sh` expects to own the tap symlink — it refuses to run while a real tap clone is installed (swap it out first, as in Local testing above), and it uninstalls the formula when done.
 

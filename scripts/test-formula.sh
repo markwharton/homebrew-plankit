@@ -30,7 +30,19 @@ export HOMEBREW_NO_AUTO_UPDATE=1
 export HOMEBREW_NO_INSTALL_CLEANUP=1
 export HOMEBREW_NO_ENV_HINTS=1
 
-brew install --build-from-source "markwharton/plankit/$formula"
+# Downloads drop occasionally on CI runners (broken pipe mid-fetch) —
+# retry the network-bound step; everything after it is local.
+for attempt in 1 2 3; do
+  if brew install --build-from-source "markwharton/plankit/$formula"; then
+    break
+  fi
+  if [ "$attempt" -eq 3 ]; then
+    echo "error: brew install failed after 3 attempts" >&2
+    exit 1
+  fi
+  echo "brew install attempt $attempt failed; retrying in 10s..." >&2
+  sleep 10
+done
 "$formula" --version 2>&1
 brew test "markwharton/plankit/$formula"
 brew audit --new "markwharton/plankit/$formula"

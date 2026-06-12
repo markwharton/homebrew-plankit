@@ -54,7 +54,7 @@ IMPORTANT: Follow these rules at all times.
 ### CI/CD
 
 - `formulas.yml` is the registry of tracked formulas (formula name, upstream repo, asset prefix) — new formulas must be added there for CI to cover them.
-- `.github/workflows/test-formulas.yml` — runs `scripts/test-formula.sh <formula>` (install → `--version` → `brew test` → `brew audit --new` → uninstall) for every registered formula on all four release platforms (macOS arm64 + Intel, Linux amd64 + arm64), for pushes/PRs touching `Formula/**`.
+- `.github/workflows/test-formulas.yml` — runs `scripts/test-formula.sh <formula>` (install → `--version` → `brew test` → `brew audit --new` → uninstall) for every registered formula on all four release platforms (macOS arm64 + Intel, Linux amd64 + arm64), for pushes/PRs touching `Formula/**` or the test tooling (`formulas.yml`, `scripts/`, the workflow itself).
 - `.github/workflows/bump-formulas.yml` — daily schedule, `repository_dispatch` (type `bump-formula`), or manual dispatch. Runs `scripts/bump-formula.rb` per formula, smoke-tests on macOS, opens a bump PR against `develop`.
 - Auto-bump PRs use the default `GITHUB_TOKEN`, which cannot trigger other workflows — that's why the bump workflow smoke-tests before opening the PR; the full four-platform test runs when the merge lands on `develop`.
 - Scheduled/dispatch triggers only fire from the default branch (`main`) — automation activates once these workflows are released.
