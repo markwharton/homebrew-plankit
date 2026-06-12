@@ -4,3 +4,5 @@ updates:
     directory: /
     schedule:
       interval: weekly
+    # PRs must land on develop first (develop -> main release flow).
+    target-branch: develop
