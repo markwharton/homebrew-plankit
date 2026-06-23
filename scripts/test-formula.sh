@@ -11,6 +11,15 @@ set -euo pipefail
 formula="${1:?usage: scripts/test-formula.sh <formula>}"
 repo_root="$(cd "$(dirname "$0")/.." && pwd)"
 
+# The installed command is the formula's asset_prefix, not the formula name:
+# each formula does `bin.install Dir["<asset_prefix>-*"].first => "<asset_prefix>"`.
+# They diverge for `plankit`, which installs the `pk` command.
+command="$(FORMULA="$formula" ruby -ryaml -e '
+  entry = YAML.load_file(ARGV[0]).fetch("formulas").find { |e| e["formula"] == ENV["FORMULA"] }
+  abort "unknown formula: #{ENV["FORMULA"]}" unless entry
+  print entry.fetch("asset_prefix")
+' "$repo_root/formulas.yml")"
+
 # GitHub's ubuntu runners ship without brew on PATH when installed fresh.
 if ! command -v brew >/dev/null 2>&1; then
   eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
@@ -43,7 +52,7 @@ for attempt in 1 2 3; do
   echo "brew install attempt $attempt failed; retrying in 10s..." >&2
   sleep 10
 done
-"$formula" --version 2>&1
+"$command" --version 2>&1
 brew test "markwharton/plankit/$formula"
 brew audit --new "markwharton/plankit/$formula"
 brew uninstall "markwharton/plankit/$formula"

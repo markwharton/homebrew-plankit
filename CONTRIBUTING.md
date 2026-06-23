@@ -32,10 +32,10 @@ ln -s /Users/markwharton/Projects/markwharton/homebrew-plankit /opt/homebrew/Lib
 Then run the test loop:
 
 ```bash
-brew install --build-from-source markwharton/plankit/pk
+brew install --build-from-source markwharton/plankit/plankit
 pk --version
-brew test markwharton/plankit/pk
-brew audit --new markwharton/plankit/pk
+brew test markwharton/plankit/plankit
+brew audit --new markwharton/plankit/plankit
 
 brew install --build-from-source markwharton/plankit/mcp-bridge
 mcp-bridge --version
@@ -46,7 +46,7 @@ brew audit --new markwharton/plankit/mcp-bridge
 Cleanup:
 
 ```bash
-brew uninstall markwharton/plankit/pk markwharton/plankit/mcp-bridge
+brew uninstall markwharton/plankit/plankit markwharton/plankit/mcp-bridge
 rm /opt/homebrew/Library/Taps/markwharton/homebrew-plankit
 ```
 

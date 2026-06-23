@@ -1,8 +1,13 @@
-class Pk < Formula
+class Plankit < Formula
   desc "Plan-driven development toolkit for Claude Code"
   homepage "https://plankit.com/pk/"
   version "0.24.1"
   license "MIT"
+
+  # homebrew/core ships an unrelated "pk" (field extractor) that also installs
+  # a `pk` binary, so the two can't be linked at once. Named "plankit" to avoid
+  # the bare-name collision; this makes the binary conflict explicit.
+  conflicts_with "pk", because: "both install a `pk` binary"
 
   on_macos do
     on_arm do

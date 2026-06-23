@@ -6,7 +6,7 @@ Homebrew tap for the [plankit](https://plankit.com) workshop.
 
 ```bash
 brew tap markwharton/plankit
-brew install markwharton/plankit/pk
+brew install plankit
 brew install markwharton/plankit/mcp-bridge
 ```
 
@@ -19,5 +19,5 @@ mcp-bridge --version
 
 ## Formulas
 
-- `pk` — plan-driven development toolkit for Claude Code
+- `plankit` — plan-driven development toolkit for Claude Code (installs the `pk` command)
 - `mcp-bridge` — stdio-to-HTTP bridge for MCP servers

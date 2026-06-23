@@ -18,7 +18,7 @@ IMPORTANT: Follow these rules at all times.
 ### Project Type
 
 - **Homebrew tap** providing two Formulas under `Formula/`:
-  - `pk.rb` — plan-driven development toolkit for Claude Code (binaries from `markwharton/plankit` releases)
+  - `plankit.rb` — plan-driven development toolkit for Claude Code, installs the `pk` command (binaries from `markwharton/plankit` releases). Named `plankit`, not `pk`, because homebrew/core ships an unrelated `pk`.
   - `mcp-bridge.rb` — stdio-to-HTTP MCP bridge (binaries from `markwharton/mcp-bridge` releases)
 - No build system — Formulas download prebuilt binaries for `darwin-arm64`, `darwin-amd64`, `linux-arm64`, `linux-amd64`.
 - Tap is consumed as `brew tap markwharton/plankit` → `brew install markwharton/plankit/<formula>`.

@@ -1,8 +1,11 @@
 # Registry of formulas tracked by CI (see .github/workflows/ and scripts/).
 # Each entry: the Formula file name, the upstream GitHub repo releases are
 # pulled from, and the prefix of its release assets (<prefix>-<os>-<arch>).
+# The asset prefix is also the installed command name (the formula does
+# `bin.install Dir["<prefix>-*"].first => "<prefix>"`); it differs from the
+# formula name for `plankit`, which installs the `pk` command.
 formulas:
-  - formula: pk
+  - formula: plankit
     repo: markwharton/plankit
     asset_prefix: pk
   - formula: mcp-bridge
