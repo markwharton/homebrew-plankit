@@ -1,7 +1,7 @@
 class Plankit < Formula
   desc "Plan-driven development toolkit for Claude Code"
   homepage "https://plankit.com/pk/"
-  version "0.26.0"
+  version "0.26.1"
   license "MIT"
 
   # homebrew/core ships an unrelated "pk" (field extractor) that also installs
@@ -12,22 +12,22 @@ class Plankit < Formula
   on_macos do
     on_arm do
       url "https://github.com/markwharton/plankit/releases/download/v#{version}/pk-darwin-arm64"
-      sha256 "e4eeabb37b9d16cade0b23e85e87a74ed1637ec52ccc40895fd20a48f86159f9"
+      sha256 "22c9cd4044b521fcd53b27809dd3a9e1d670384b03fe9cbbc54395888839a4e2"
     end
     on_intel do
       url "https://github.com/markwharton/plankit/releases/download/v#{version}/pk-darwin-amd64"
-      sha256 "bb3cb62355341d82dff887520bc6a40ffebf311a6181b503be0c95453abec072"
+      sha256 "71b4351c37132ac557feaa24b687f9f0ef8ab19fbb5e947ea83f76e443ce15b3"
     end
   end
 
   on_linux do
     on_arm do
       url "https://github.com/markwharton/plankit/releases/download/v#{version}/pk-linux-arm64"
-      sha256 "a14f7ec8af3f847bfa89585fdab054477a605b7c8f9f69357a2c772fc8b9854d"
+      sha256 "94e707d0e44e857717d3e85e79546d9d8d80160ec59317cd967709eaa7d9ec65"
     end
     on_intel do
       url "https://github.com/markwharton/plankit/releases/download/v#{version}/pk-linux-amd64"
-      sha256 "4a9328f792999c55cc39cff0a3546b9f66d0fab145571af322d3342d144c80bd"
+      sha256 "676553b3d0758998a4d08851bfa9f0ba3622833f28ba142e3c4b00343df3411f"
     end
   end
 
