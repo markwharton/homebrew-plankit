@@ -35,12 +35,12 @@ Then run the test loop:
 brew install --build-from-source markwharton/plankit/plankit
 pk --version
 brew test markwharton/plankit/plankit
-brew audit --new markwharton/plankit/plankit
+brew audit --new --except=version markwharton/plankit/plankit
 
 brew install --build-from-source markwharton/plankit/mcp-bridge
 mcp-bridge --version
 brew test markwharton/plankit/mcp-bridge
-brew audit --new markwharton/plankit/mcp-bridge
+brew audit --new --except=version markwharton/plankit/mcp-bridge
 ```
 
 Cleanup:
@@ -106,4 +106,4 @@ Why squash: the PR title is a conventional commit (`chore: bump <formula> to vX.
 ## Notes
 
 - `pk --version` and `mcp-bridge --version` write to stderr — Formula test blocks use `2>&1` to redirect into `shell_output`.
-- `brew audit --new` is worth passing before committing a new Formula or bump.
+- `brew audit --new --except=version` is worth passing before committing a new Formula or bump. `--except=version` skips only the "version is redundant with version scanned from URL" check — the Formulas intentionally keep an explicit `version` that the platform URLs interpolate — while every other strict/new-formula audit still runs.

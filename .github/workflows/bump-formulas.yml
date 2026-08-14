@@ -60,6 +60,6 @@ jobs:
             Automated bump of `${{ matrix.formula }}` to [v${{ steps.bump.outputs.version }}](https://github.com/${{ matrix.repo }}/releases/tag/v${{ steps.bump.outputs.version }}).
 
             `version` and all four `sha256` values taken from the release `checksums.txt`.
-            Smoke-tested on macOS (arm64) in [this run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}): install → `--version` → `brew test` → `brew audit --new`.
+            Smoke-tested on macOS (arm64) in [this run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}): install → `--version` → `brew test` → `brew audit --new --except=version`.
             Merging triggers the four-platform test workflow on `develop` (auto-bump PRs can't trigger it directly — GITHUB_TOKEN events don't start workflows).
           delete-branch: true

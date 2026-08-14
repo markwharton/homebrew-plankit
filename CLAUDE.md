@@ -35,9 +35,9 @@ IMPORTANT: Follow these rules at all times.
 ### Testing (Smoke)
 
 - Symlink the working tree into Homebrew's taps dir (see CONTRIBUTING.md) so uncommitted Formula edits are visible.
-- Per Formula, run: `brew install --build-from-source markwharton/plankit/<name>` → `<name> --version` → `brew test markwharton/plankit/<name>` → `brew audit --new markwharton/plankit/<name>`.
+- Per Formula, run: `brew install --build-from-source markwharton/plankit/<name>` → `<name> --version` → `brew test markwharton/plankit/<name>` → `brew audit --new --except=version markwharton/plankit/<name>`.
 - `pk --version` and `mcp-bridge --version` write to **stderr** — Formula test blocks redirect with `2>&1` before `shell_output`.
-- `brew audit --new` must pass before committing a new Formula or a bump.
+- `brew audit --new --except=version` must pass before committing a new Formula or a bump. `--except=version` skips only the "version is redundant with version scanned from URL" check — the Formulas keep an explicit `version` that the four platform URLs interpolate (`v#{version}`), which newer Homebrew flags under `--strict` — while every other strict/new-formula audit still runs.
 - Cleanup with `brew uninstall` and remove the symlink.
 
 ### Branch & Release Flow
@@ -55,7 +55,7 @@ IMPORTANT: Follow these rules at all times.
 ### CI/CD
 
 - `formulas.yml` is the registry of tracked formulas (formula name, upstream repo, asset prefix) — new formulas must be added there for CI to cover them.
-- `.github/workflows/test-formulas.yml` — runs `scripts/test-formula.sh <formula>` (install → `--version` → `brew test` → `brew audit --new` → uninstall) for every registered formula on all four release platforms (macOS arm64 + Intel, Linux amd64 + arm64), for pushes/PRs touching `Formula/**` or the test tooling (`formulas.yml`, `scripts/`, the workflow itself).
+- `.github/workflows/test-formulas.yml` — runs `scripts/test-formula.sh <formula>` (install → `--version` → `brew test` → `brew audit --new --except=version` → uninstall) for every registered formula on all four release platforms (macOS arm64 + Intel, Linux amd64 + arm64), for pushes/PRs touching `Formula/**` or the test tooling (`formulas.yml`, `scripts/`, the workflow itself).
 - `.github/workflows/bump-formulas.yml` — daily schedule, `repository_dispatch` (type `bump-formula`), or manual dispatch. Runs `scripts/bump-formula.rb` per formula, smoke-tests on macOS, opens a bump PR against `develop`.
 - Auto-bump PRs use the default `GITHUB_TOKEN`, which cannot trigger other workflows — that's why the bump workflow smoke-tests before opening the PR; the full four-platform test runs when the merge lands on `develop`.
 - Scheduled/dispatch triggers only fire from the default branch (`main`) — automation activates once these workflows are released.

@@ -4,11 +4,6 @@ class Plankit < Formula
   version "0.29.1"
   license "MIT"
 
-  # homebrew/core ships an unrelated "pk" (field extractor) that also installs
-  # a `pk` binary, so the two can't be linked at once. Named "plankit" to avoid
-  # the bare-name collision; this makes the binary conflict explicit.
-  conflicts_with "pk", because: "both install a `pk` binary"
-
   on_macos do
     on_arm do
       url "https://github.com/markwharton/plankit/releases/download/v#{version}/pk-darwin-arm64"
@@ -30,6 +25,11 @@ class Plankit < Formula
       sha256 "febef95450002b22ce42bd198c4f5c5a77edde510414da26dc7c79bfc625b41e"
     end
   end
+
+  # homebrew/core ships an unrelated "pk" (field extractor) that also installs
+  # a `pk` binary, so the two can't be linked at once. Named "plankit" to avoid
+  # the bare-name collision; this makes the binary conflict explicit.
+  conflicts_with "pk", because: "both install a `pk` binary"
 
   def install
     bin.install Dir["pk-*"].first => "pk"

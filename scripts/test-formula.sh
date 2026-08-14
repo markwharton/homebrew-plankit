@@ -1,7 +1,12 @@
 #!/usr/bin/env bash
 # Smoke-test a Formula from this working tree (the CONTRIBUTING.md loop):
-# install --build-from-source -> --version -> brew test -> brew audit --new,
-# then uninstall. Symlinks the working tree into Homebrew's taps dir so
+# install --build-from-source -> --version -> brew test ->
+# brew audit --new --except=version, then uninstall. `--except=version` skips
+# only the "version is redundant with version scanned from URL" check: our
+# formulas keep an explicit `version` that the four platform URLs interpolate
+# (`v#{version}`), which newer Homebrew flags under --strict. All other
+# strict/new-formula audits still run. Symlinks the working tree into
+# Homebrew's taps dir so
 # uncommitted Formula edits are visible; refuses to clobber an existing tap
 # checkout that isn't that symlink.
 #
@@ -54,5 +59,5 @@ for attempt in 1 2 3; do
 done
 "$command" --version 2>&1
 brew test "markwharton/plankit/$formula"
-brew audit --new "markwharton/plankit/$formula"
+brew audit --new --except=version "markwharton/plankit/$formula"
 brew uninstall "markwharton/plankit/$formula"
