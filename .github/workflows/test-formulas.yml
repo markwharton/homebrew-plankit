@@ -2,7 +2,7 @@ name: Test formulas
 
 on:
   push:
-    branches: [develop, main]
+    branches: [main]
     paths:
       - "Formula/**"
       - "formulas.yml"

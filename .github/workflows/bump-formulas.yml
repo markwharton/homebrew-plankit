@@ -23,7 +23,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
-          ref: develop
+          ref: main
       - name: Read formulas.yml
         id: list
         run: |
@@ -38,7 +38,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
-          ref: develop
+          ref: main
       - name: Bump ${{ matrix.formula }} to latest release
         id: bump
         env:
@@ -51,7 +51,7 @@ jobs:
         if: steps.bump.outputs.updated == 'true'
         uses: peter-evans/create-pull-request@v8
         with:
-          base: develop
+          base: main
           branch: bump/${{ matrix.formula }}
           add-paths: Formula/${{ matrix.formula }}.rb
           commit-message: "chore: bump ${{ matrix.formula }} to v${{ steps.bump.outputs.version }}"
@@ -61,5 +61,5 @@ jobs:
 
             `version` and all four `sha256` values taken from the release `checksums.txt`.
             Smoke-tested on macOS (arm64) in [this run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}): install → `--version` → `brew test` → `brew audit --new --except=version`.
-            Merging triggers the four-platform test workflow on `develop` (auto-bump PRs can't trigger it directly — GITHUB_TOKEN events don't start workflows).
+            Merging triggers the four-platform test workflow on `main` (auto-bump PRs can't trigger it directly — GITHUB_TOKEN events don't start workflows).
           delete-branch: true
