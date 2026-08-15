@@ -42,9 +42,9 @@ IMPORTANT: Follow these rules at all times.
 
 ### Branch & Release Flow
 
-- **Development branch:** `develop`.
-- **Protected branch:** `main` — `pk guard` blocks direct commits. Never commit directly to `main`.
-- **Release:** `pk release` merges `develop` into `main` before pushing.
+- **Trunk flow:** one branch, `main`. Work lands on `main` and releases are cut there; there is no development branch and no merge step.
+- **Release:** on `main`, `pk changelog && pk release` (or `/ship`) — `pk release` tags HEAD and pushes `main` + tag atomically.
+- **`.pk.json`:** no `release.branch` (its absence selects trunk flow) and no `guard.branches` (a guard on `main` would block every commit). `pk setup` prints a "no release branch" reminder; that is expected in trunk flow.
 - **Bump/Dependabot PRs: always squash-merge** (`gh pr merge --squash --delete-branch`), then `git pull --rebase` before shipping. Squashing lands the PR's conventional-commit title as one commit so `pk changelog` picks it up; a regular merge commit is non-conventional and silently drops the bump from the changelog.
 
 ### Commit Style
@@ -56,7 +56,6 @@ IMPORTANT: Follow these rules at all times.
 
 - `formulas.yml` is the registry of tracked formulas (formula name, upstream repo, asset prefix) — new formulas must be added there for CI to cover them.
 - `.github/workflows/test-formulas.yml` — runs `scripts/test-formula.sh <formula>` (install → `--version` → `brew test` → `brew audit --new --except=version` → uninstall) for every registered formula on all four release platforms (macOS arm64 + Intel, Linux amd64 + arm64), for pushes/PRs touching `Formula/**` or the test tooling (`formulas.yml`, `scripts/`, the workflow itself).
-- `.github/workflows/bump-formulas.yml` — daily schedule, `repository_dispatch` (type `bump-formula`), or manual dispatch. Runs `scripts/bump-formula.rb` per formula, smoke-tests on macOS, opens a bump PR against `develop`.
-- Auto-bump PRs use the default `GITHUB_TOKEN`, which cannot trigger other workflows — that's why the bump workflow smoke-tests before opening the PR; the full four-platform test runs when the merge lands on `develop`.
-- Scheduled/dispatch triggers only fire from the default branch (`main`) — automation activates once these workflows are released.
+- `.github/workflows/bump-formulas.yml` — daily schedule, `repository_dispatch` (type `bump-formula`), or manual dispatch. Runs `scripts/bump-formula.rb` per formula, smoke-tests on macOS, opens a bump PR against `main`.
+- Auto-bump PRs use the default `GITHUB_TOKEN`, which cannot trigger other workflows — that's why the bump workflow smoke-tests before opening the PR; the full four-platform test runs when the merge lands on `main`.
 - Dependabot keeps GitHub Actions versions current (`.github/dependabot.yml`).

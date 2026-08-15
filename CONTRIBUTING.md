@@ -54,12 +54,12 @@ rm /opt/homebrew/Library/Taps/markwharton/homebrew-plankit
 
 `formulas.yml` registers every formula CI tracks (formula name, upstream repo, asset prefix). Two workflows consume it:
 
-- **`bump-formulas.yml`** — daily (and on `repository_dispatch` type `bump-formula`, or manually from the Actions tab) runs `scripts/bump-formula.rb` per formula; if upstream has a newer release it rewrites `version` + the four `sha256` values, smoke-tests on macOS, and opens a PR against `develop`.
+- **`bump-formulas.yml`** — daily (and on `repository_dispatch` type `bump-formula`, or manually from the Actions tab) runs `scripts/bump-formula.rb` per formula; if upstream has a newer release it rewrites `version` + the four `sha256` values, smoke-tests on macOS, and opens a PR against `main`.
 - **`test-formulas.yml`** — runs `scripts/test-formula.sh <formula>` for every formula when `Formula/**` or the test tooling changes (push or PR), on one runner per release artifact: macOS arm64 (`macos-latest`), macOS Intel (`macos-15-intel`), Linux amd64 (`ubuntu-latest`), and Linux arm64 (`ubuntu-24.04-arm`) — every published binary actually gets executed.
 
 Both scripts run locally too. `scripts/test-formula.sh` expects to own the tap symlink — it refuses to run while a real tap clone is installed (swap it out first, as in Local testing above), and it uninstalls the formula when done.
 
-Auto-bump PRs are opened with the default `GITHUB_TOKEN`, which GitHub doesn't allow to trigger other workflows — the bump workflow smoke-tests before opening the PR, and the full four-platform test workflow runs when the merge pushes to `develop`. Scheduled and dispatch triggers fire from the default branch (`main`), so automation goes live once the workflows are released.
+Auto-bump PRs are opened with the default `GITHUB_TOKEN`, which GitHub doesn't allow to trigger other workflows — the bump workflow smoke-tests before opening the PR, and the full four-platform test workflow runs when the merge pushes to `main`.
 
 For instant bumps instead of the daily check, upstream repos ping this repo on release. The pieces:
 
@@ -85,6 +85,10 @@ For instant bumps instead of the daily check, upstream repos ping this repo on r
 
 `plankit` and `mcp-bridge` are set up this way already.
 
+## Releasing
+
+The tap uses trunk flow: one branch, `main`, and releases are cut where the work lands. There is no working branch and no merge step. To release, on `main` with a clean tree run `pk changelog && pk release` (or `/ship` in Claude Code): `pk changelog` computes the version and writes the release commit, `pk release` tags HEAD and pushes `main` + tag atomically. `.pk.json` deliberately has no `release.branch` (its absence is what selects trunk flow) and no `guard.branches` (a branch guard on `main` would block every commit on the only branch).
+
 ### Merging bump PRs
 
 Always **squash-merge** bump PRs (and Dependabot PRs), then rebase local work on top before shipping:
@@ -95,7 +99,7 @@ git pull --rebase   # replays any unpushed local commits on top of the merge
 pk changelog && pk release   # or /ship
 ```
 
-Why squash: the PR title is a conventional commit (`chore: bump <formula> to vX.Y.Z`), so a squash lands exactly one changelog-ready commit on `develop`. A regular merge adds a non-conventional `Merge pull request #N` commit — `pk changelog` skips those, so mixing merge styles produces releases where some bumps appear in the changelog and some don't.
+Why squash: the PR title is a conventional commit (`chore: bump <formula> to vX.Y.Z`), so a squash lands exactly one changelog-ready commit on `main`. A regular merge adds a non-conventional `Merge pull request #N` commit — `pk changelog` skips those, so mixing merge styles produces releases where some bumps appear in the changelog and some don't.
 
 ## Adding a formula
 
