@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [v0.2.15] - 2026-08-16
+
+### Documentation
+
+- describe trunk flow (2c6595a)
+
+### Maintenance
+
+- base bump PRs on main (cfd5316)
+
 ## [v0.2.14] - 2026-08-14
 
 ### Fixed
@@ -139,3 +149,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 [v0.2.12]: https://github.com/markwharton/homebrew-plankit/compare/v0.2.11...v0.2.12
 [v0.2.13]: https://github.com/markwharton/homebrew-plankit/compare/v0.2.12...v0.2.13
 [v0.2.14]: https://github.com/markwharton/homebrew-plankit/compare/v0.2.13...v0.2.14
+[v0.2.15]: https://github.com/markwharton/homebrew-plankit/compare/v0.2.14...v0.2.15
