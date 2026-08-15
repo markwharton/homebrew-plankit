@@ -1,15 +1,9 @@
 {
   "guard": {
-    "branches": [
-      "main"
-    ],
     "mode": "block",
     "push": "off"
   },
   "preserve": {
     "mode": "manual"
-  },
-  "release": {
-    "branch": "main"
   }
 }
