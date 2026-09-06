@@ -87,7 +87,7 @@ For instant bumps instead of the daily check, upstream repos ping this repo on r
 
 ## Releasing
 
-The tap uses trunk flow: one branch, `main`, and releases are cut where the work lands. There is no working branch and no merge step. To release, on `main` with a clean tree run `pk changelog && pk release` (or `/ship` in Claude Code): `pk changelog` computes the version and writes the release commit, `pk release` tags HEAD and pushes `main` + tag atomically. `.pk.json` deliberately has no `release.branch` (its absence is what selects trunk flow) and no `guard.branches` (a branch guard on `main` would block every commit on the only branch).
+The tap uses trunk flow: one branch, `main`, and releases are cut where the work lands. There is no working branch and no merge step. To release, on `main` with a clean tree run `pk changelog && pk release` (or `/plankit:ship` in Claude Code): `pk changelog` computes the version and writes the release commit, `pk release` tags HEAD and pushes `main` + tag atomically. `.pk.json` deliberately has no `release.branch` (its absence is what selects trunk flow) and no `guard.branches` (a branch guard on `main` would block every commit on the only branch).
 
 ### Merging bump PRs
 
@@ -96,7 +96,7 @@ Always **squash-merge** bump PRs (and Dependabot PRs), then rebase local work on
 ```bash
 gh pr merge <number> --squash --delete-branch
 git pull --rebase   # replays any unpushed local commits on top of the merge
-pk changelog && pk release   # or /ship
+pk changelog && pk release   # or /plankit:ship
 ```
 
 Why squash: the PR title is a conventional commit (`chore: bump <formula> to vX.Y.Z`), so a squash lands exactly one changelog-ready commit on `main`. A regular merge adds a non-conventional `Merge pull request #N` commit — `pk changelog` skips those, so mixing merge styles produces releases where some bumps appear in the changelog and some don't.

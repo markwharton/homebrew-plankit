@@ -43,8 +43,8 @@ IMPORTANT: Follow these rules at all times.
 ### Branch & Release Flow
 
 - **Trunk flow:** one branch, `main`. Work lands on `main` and releases are cut there; there is no development branch and no merge step.
-- **Release:** on `main`, `pk changelog && pk release` (or `/ship`) — `pk release` tags HEAD and pushes `main` + tag atomically.
-- **`.pk.json`:** no `release.branch` (its absence selects trunk flow) and no `guard.branches` (a guard on `main` would block every commit). `pk setup` prints a "no release branch" reminder; that is expected in trunk flow.
+- **Release:** on `main`, `pk changelog && pk release` (or `/plankit:ship`) — `pk release` tags HEAD and pushes `main` + tag atomically.
+- **`.pk.json`:** no `release.branch` (its absence selects trunk flow) and no `guard.branches` (a guard on `main` would block every commit). `pk status` shows an empty `release:` line; that is expected in trunk flow.
 - **Bump/Dependabot PRs: always squash-merge** (`gh pr merge --squash --delete-branch`), then `git pull --rebase` before shipping. Squashing lands the PR's conventional-commit title as one commit so `pk changelog` picks it up; a regular merge commit is non-conventional and silently drops the bump from the changelog.
 
 ### Commit Style
