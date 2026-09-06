@@ -17,8 +17,9 @@ IMPORTANT: Follow these rules at all times.
 
 ### Project Type
 
-- **Homebrew tap** providing one Formula under `Formula/`:
+- **Homebrew tap** providing two Formulas under `Formula/`:
   - `plankit.rb` — plan-driven development toolkit for Claude Code, installs the `pk` command (binaries from `markwharton/plankit` releases). Named `plankit`, not `pk`, because homebrew/core ships an unrelated `pk`.
+  - `mcp-bridge.rb` — stdio-to-HTTP MCP bridge (binaries from `markwharton/mcp-bridge` releases)
 - No build system — Formulas download prebuilt binaries for `darwin-arm64`, `darwin-amd64`, `linux-arm64`, `linux-amd64`.
 - Tap is consumed as `brew tap markwharton/plankit` → `brew install markwharton/plankit/<formula>`.
 
@@ -26,14 +27,16 @@ IMPORTANT: Follow these rules at all times.
 
 - Preferred: `ruby scripts/bump-formula.rb [<formula>]` — updates `version` and the four `sha256` values from the latest upstream release (CI runs the same script daily; see CI/CD).
 - Manual fallback: update both `version` and the four `sha256` values per Formula.
-- Fetch checksums from the upstream release's `checksums.txt`: `curl -sL https://github.com/markwharton/plankit/releases/download/vX.Y.Z/checksums.txt`
+- Fetch checksums from the upstream release's `checksums.txt`:
+  - `curl -sL https://github.com/markwharton/plankit/releases/download/vX.Y.Z/checksums.txt`
+  - `curl -sL https://github.com/markwharton/mcp-bridge/releases/download/vX.Y.Z/checksums.txt`
 - Each line is `<sha256>  <filename>` — map to the matching `on_macos`/`on_linux` × `on_arm`/`on_intel` block.
 
 ### Testing (Smoke)
 
 - Symlink the working tree into Homebrew's taps dir (see CONTRIBUTING.md) so uncommitted Formula edits are visible.
 - Per Formula, run: `brew install --build-from-source markwharton/plankit/<name>` → `<name> --version` → `brew test markwharton/plankit/<name>` → `brew audit --new --except=version markwharton/plankit/<name>`.
-- `pk --version` writes to **stderr** — Formula test blocks redirect with `2>&1` before `shell_output`.
+- `pk --version` and `mcp-bridge --version` write to **stderr** — Formula test blocks redirect with `2>&1` before `shell_output`.
 - `brew audit --new --except=version` must pass before committing a new Formula or a bump. `--except=version` skips only the "version is redundant with version scanned from URL" check — the Formulas keep an explicit `version` that the four platform URLs interpolate (`v#{version}`), which newer Homebrew flags under `--strict` — while every other strict/new-formula audit still runs.
 - Cleanup with `brew uninstall` and remove the symlink.
 

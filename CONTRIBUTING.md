@@ -4,17 +4,18 @@ Notes for maintaining the tap. Normal users don't need any of this — they just
 
 ## Bumping a Formula
 
-Each release of `pk` needs `version` and `sha256` lines updated in the relevant `Formula/*.rb`. The easy way:
+Each release of `pk` or `mcp-bridge` needs `version` and `sha256` lines updated in the relevant `Formula/*.rb`. The easy way:
 
 ```bash
 ruby scripts/bump-formula.rb              # all formulas in formulas.yml
-ruby scripts/bump-formula.rb plankit      # just one
+ruby scripts/bump-formula.rb mcp-bridge   # just one
 ```
 
 CI runs the same script daily and opens bump PRs (see Automation below). To do it by hand instead, fetch checksums from the tool's release:
 
 ```bash
 curl -sL https://github.com/markwharton/plankit/releases/download/vX.Y.Z/checksums.txt
+curl -sL https://github.com/markwharton/mcp-bridge/releases/download/vX.Y.Z/checksums.txt
 ```
 
 Each line is `<sha256>  <filename>`. Substitute the hash for each platform into the Formula.
@@ -35,12 +36,17 @@ brew install --build-from-source markwharton/plankit/plankit
 pk --version
 brew test markwharton/plankit/plankit
 brew audit --new --except=version markwharton/plankit/plankit
+
+brew install --build-from-source markwharton/plankit/mcp-bridge
+mcp-bridge --version
+brew test markwharton/plankit/mcp-bridge
+brew audit --new --except=version markwharton/plankit/mcp-bridge
 ```
 
 Cleanup:
 
 ```bash
-brew uninstall markwharton/plankit/plankit
+brew uninstall markwharton/plankit/plankit markwharton/plankit/mcp-bridge
 rm /opt/homebrew/Library/Taps/markwharton/homebrew-plankit
 ```
 
@@ -77,7 +83,7 @@ For instant bumps instead of the daily check, upstream repos ping this repo on r
         -d '{"event_type":"bump-formula"}'
   ```
 
-`plankit` is set up this way already.
+`plankit` and `mcp-bridge` are set up this way already.
 
 ## Releasing
 
@@ -103,5 +109,5 @@ Why squash: the PR title is a conventional commit (`chore: bump <formula> to vX.
 
 ## Notes
 
-- `pk --version` writes to stderr — Formula test blocks use `2>&1` to redirect into `shell_output`.
+- `pk --version` and `mcp-bridge --version` write to stderr — Formula test blocks use `2>&1` to redirect into `shell_output`.
 - `brew audit --new --except=version` is worth passing before committing a new Formula or bump. `--except=version` skips only the "version is redundant with version scanned from URL" check — the Formulas intentionally keep an explicit `version` that the platform URLs interpolate — while every other strict/new-formula audit still runs.
