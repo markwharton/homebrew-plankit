@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [v0.2.20] - 2026-09-06
+
+### Maintenance
+
+- drop mcp-bridge Formula (ddf6fea)
+
 ## [v0.2.19] - 2026-09-06
 
 ### Maintenance
@@ -179,3 +185,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 [v0.2.17]: https://github.com/markwharton/homebrew-plankit/compare/v0.2.16...v0.2.17
 [v0.2.18]: https://github.com/markwharton/homebrew-plankit/compare/v0.2.17...v0.2.18
 [v0.2.19]: https://github.com/markwharton/homebrew-plankit/compare/v0.2.18...v0.2.19
+[v0.2.20]: https://github.com/markwharton/homebrew-plankit/compare/v0.2.19...v0.2.20
