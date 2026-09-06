@@ -8,6 +8,3 @@ formulas:
   - formula: plankit
     repo: markwharton/plankit
     asset_prefix: pk
-  - formula: mcp-bridge
-    repo: markwharton/mcp-bridge
-    asset_prefix: mcp-bridge
