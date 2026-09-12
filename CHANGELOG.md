@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [v0.2.22] - 2026-09-12
+
+### Maintenance
+
+- bump plankit to v1.1.0 (#18) (81d4310)
+
 ## [v0.2.21] - 2026-09-06
 
 ### Fixed
@@ -197,3 +203,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 [v0.2.19]: https://github.com/markwharton/homebrew-plankit/compare/v0.2.18...v0.2.19
 [v0.2.20]: https://github.com/markwharton/homebrew-plankit/compare/v0.2.19...v0.2.20
 [v0.2.21]: https://github.com/markwharton/homebrew-plankit/compare/v0.2.20...v0.2.21
+[v0.2.22]: https://github.com/markwharton/homebrew-plankit/compare/v0.2.21...v0.2.22
