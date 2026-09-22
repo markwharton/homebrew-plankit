@@ -126,6 +126,9 @@ jobs:
         run: |
           version="$(ruby -e 'print File.read("Formula/plankit.rb")[/^\s*version "([^"]+)"/, 1] || abort("no version line in Formula/plankit.rb")')"
           sha="$(ruby -e 'print File.read("Formula/plankit.rb")[%r{url "[^"]*/pk-linux-amd64"\n\s*sha256 "([0-9a-f]{64})"}, 1] || abort("no linux-amd64 sha256 in Formula/plankit.rb")')"
+          # Outside the checkout: pk ship refuses a dirty tree, and an untracked
+          # download would make it one.
+          cd "$RUNNER_TEMP"
           curl -fsSL -o pk "https://github.com/markwharton/plankit/releases/download/v${version}/pk-linux-amd64"
           echo "${sha}  pk" | sha256sum -c -
           mkdir -p "$HOME/.local/bin"
