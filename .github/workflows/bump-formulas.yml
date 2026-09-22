@@ -1,4 +1,10 @@
-name: Bump formulas
+# Carries an upstream release all the way to a tap release with no human
+# step: bump the formula, test it on all four release platforms, fast-forward
+# main to the tested commit, then pk ship on main. A failure anywhere before
+# `land` leaves main untouched. Every push here is made with GITHUB_TOKEN,
+# which never triggers other workflows — the test gate therefore runs inside
+# this workflow (test-formulas.yml as a workflow_call), not on a PR.
+name: Bump and release formulas
 
 on:
   schedule:
@@ -6,60 +12,144 @@ on:
   repository_dispatch:
     types: [bump-formula]
   workflow_dispatch:
+    inputs:
+      break_checksum:
+        description: "Rehearse the gate: zero every sha256 in the bumped formula so all four platforms fail and nothing lands"
+        type: boolean
+        default: false
 
 permissions:
   contents: write
-  pull-requests: write
 
+# Serialises runs: two upstream releases minutes apart queue, never race.
 concurrency:
   group: bump-formulas
   cancel-in-progress: false
 
-jobs:
-  discover:
-    runs-on: ubuntu-latest
-    outputs:
-      matrix: ${{ steps.list.outputs.matrix }}
-    steps:
-      - uses: actions/checkout@v7
-        with:
-          ref: main
-      - name: Read formulas.yml
-        id: list
-        run: |
-          echo "matrix=$(ruby -ryaml -rjson -e 'puts({ include: YAML.load_file("formulas.yml").fetch("formulas") }.to_json)')" >> "$GITHUB_OUTPUT"
+env:
+  BUMP_BRANCH: bump/run-${{ github.run_id }}
 
+jobs:
+  # macOS so the per-formula smoke test can run here, as before. Formulas
+  # bump serially, one conventional commit each, so a run with two bumps
+  # still produces one branch, one test, one landing and one release.
   bump:
-    needs: discover
     runs-on: macos-latest
-    strategy:
-      fail-fast: false
-      matrix: ${{ fromJSON(needs.discover.outputs.matrix) }}
+    outputs:
+      updated: ${{ steps.push.outputs.updated }}
+      sha: ${{ steps.push.outputs.sha }}
     steps:
       - uses: actions/checkout@v7
         with:
           ref: main
-      - name: Bump ${{ matrix.formula }} to latest release
+      - name: Configure git identity
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+      - name: Bump each formula to its latest release and smoke-test it
         id: bump
         env:
           GITHUB_TOKEN: ${{ github.token }}
-        run: ruby scripts/bump-formula.rb "${{ matrix.formula }}"
-      - name: Smoke test
-        if: steps.bump.outputs.updated == 'true'
-        run: scripts/test-formula.sh "${{ matrix.formula }}"
-      - name: Open bump PR
-        if: steps.bump.outputs.updated == 'true'
-        uses: peter-evans/create-pull-request@v8
-        with:
-          base: main
-          branch: bump/${{ matrix.formula }}
-          add-paths: Formula/${{ matrix.formula }}.rb
-          commit-message: "chore: bump ${{ matrix.formula }} to v${{ steps.bump.outputs.version }}"
-          title: "chore: bump ${{ matrix.formula }} to v${{ steps.bump.outputs.version }}"
-          body: |
-            Automated bump of `${{ matrix.formula }}` to [v${{ steps.bump.outputs.version }}](https://github.com/${{ matrix.repo }}/releases/tag/v${{ steps.bump.outputs.version }}).
+        run: |
+          first=""
+          for formula in $(ruby -ryaml -e 'puts YAML.load_file("formulas.yml").fetch("formulas").map { |f| f.fetch("formula") }'); do
+            # GITHUB_OUTPUT unset: the script's own updated=/version= outputs
+            # are per-call; the diff below is the source of truth here.
+            env -u GITHUB_OUTPUT ruby scripts/bump-formula.rb "$formula"
+            if git diff --quiet -- "Formula/$formula.rb"; then
+              continue
+            fi
+            scripts/test-formula.sh "$formula"
+            version="$(ruby -e 'print File.read(ARGV[0])[/^\s*version "([^"]+)"/, 1]' "Formula/$formula.rb")"
+            git commit -m "chore: bump $formula to v$version" -- "Formula/$formula.rb"
+            first="${first:-$formula}"
+          done
+          echo "first=$first" >> "$GITHUB_OUTPUT"
+      # Manual dispatch only. Runs after the smoke test so the failure it
+      # provokes is the four-platform gate's, which is the one being proved.
+      - name: Break the checksums (rehearsal only)
+        if: inputs.break_checksum == true && steps.bump.outputs.first != ''
+        run: |
+          ruby -e 'f = ARGV[0]; s = File.read(f); File.write(f, s.gsub(/^(\s*sha256 ")[0-9a-f]{64}(")/) { "#{$1}#{"0" * 64}#{$2}" })' "Formula/${{ steps.bump.outputs.first }}.rb"
+          git commit -m "chore: rehearse the test gate (bad checksum)" -- "Formula/${{ steps.bump.outputs.first }}.rb"
+      - name: Push the bump branch
+        id: push
+        run: |
+          if [ -z "${{ steps.bump.outputs.first }}" ]; then
+            echo "Every formula is up to date; nothing to land."
+            echo "updated=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          git push origin "HEAD:refs/heads/$BUMP_BRANCH"
+          echo "updated=true" >> "$GITHUB_OUTPUT"
+          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
-            `version` and all four `sha256` values taken from the release `checksums.txt`.
-            Smoke-tested on macOS (arm64) in [this run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}): install → `--version` → `brew test` → `brew audit --new --except=version`.
-            Merging triggers the four-platform test workflow on `main` (auto-bump PRs can't trigger it directly — GITHUB_TOKEN events don't start workflows).
-          delete-branch: true
+  # The same four-platform matrix that runs for pushes to main, against the
+  # exact commit that will land.
+  test:
+    needs: bump
+    if: needs.bump.outputs.updated == 'true'
+    uses: ./.github/workflows/test-formulas.yml
+    with:
+      ref: ${{ needs.bump.outputs.sha }}
+
+  # Server-side fast-forward; force=false makes GitHub refuse anything else,
+  # so a human push to main in the meantime fails this job and lands nothing.
+  land:
+    needs: [bump, test]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fast-forward main to the tested commit
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SHA: ${{ needs.bump.outputs.sha }}
+        run: |
+          gh api -X PATCH "repos/${{ github.repository }}/git/refs/heads/main" -f sha="$SHA" -F force=false
+
+  # pk ship on main: changelog commit, tag, atomic push of main + tag. pk is
+  # the linux-amd64 binary of the plankit release the tap now packages,
+  # checked against the sha256 the formula records for it (the same value
+  # the bump copied from that release's checksums.txt).
+  release:
+    needs: land
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: main
+          fetch-depth: 0
+      - name: Configure git identity
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+      - name: Install pk from the release the tap ships
+        run: |
+          version="$(ruby -e 'print File.read("Formula/plankit.rb")[/^\s*version "([^"]+)"/, 1] || abort("no version line in Formula/plankit.rb")')"
+          sha="$(ruby -e 'print File.read("Formula/plankit.rb")[%r{url "[^"]*/pk-linux-amd64"\n\s*sha256 "([0-9a-f]{64})"}, 1] || abort("no linux-amd64 sha256 in Formula/plankit.rb")')"
+          curl -fsSL -o pk "https://github.com/markwharton/plankit/releases/download/v${version}/pk-linux-amd64"
+          echo "${sha}  pk" | sha256sum -c -
+          mkdir -p "$HOME/.local/bin"
+          install -m 0755 pk "$HOME/.local/bin/pk"
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      - name: Rehearse the release
+        run: pk --version && pk ship --dry-run --plain
+      - name: Release
+        run: pk ship --plain
+
+  # The bump branch is scratch: the test log and the commits on main are the
+  # record. Idempotent because "Re-run failed jobs" re-runs dependents.
+  cleanup:
+    needs: [bump, test, land, release]
+    if: ${{ !cancelled() && needs.bump.outputs.updated == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete the bump branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh api "repos/${{ github.repository }}/git/ref/heads/$BUMP_BRANCH" >/dev/null 2>&1; then
+            gh api -X DELETE "repos/${{ github.repository }}/git/refs/heads/$BUMP_BRANCH"
+            echo "Deleted $BUMP_BRANCH"
+          else
+            echo "$BUMP_BRANCH already gone"
+          fi

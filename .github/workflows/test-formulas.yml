@@ -15,6 +15,14 @@ on:
       - "scripts/**"
       - ".github/workflows/test-formulas.yml"
   workflow_dispatch:
+  # Called by bump-formulas.yml to run this same matrix on its candidate
+  # commit before it lands on main.
+  workflow_call:
+    inputs:
+      ref:
+        description: "Commit to test (default: the ref of the triggering event)"
+        type: string
+        required: false
 
 permissions:
   contents: read
@@ -30,6 +38,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.ref }}
       - name: Install Homebrew (Linux)
         if: runner.os == 'Linux'
         run: |
