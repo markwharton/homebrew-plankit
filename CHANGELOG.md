@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [v0.2.24] - 2026-09-22
+
+### Documentation
+
+- describe the automated bump-to-release path (680734e)
+
+### Maintenance
+
+- automate bump-to-release in one workflow (6dcfa82)
+- rehearse automated bump (plankit back to v1.1.0) (6e1d603)
+- bump plankit to v1.2.0 (7f1bbaa)
+- rehearse automated bump again (plankit back to v1.1.0) (4edfe2e)
+- download pk outside the checkout so pk ship sees a clean tree (1666de7)
+- bump plankit to v1.2.0 (a5b7c59)
+
 ## [v0.2.23] - 2026-09-20
 
 ### Maintenance
@@ -211,3 +226,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 [v0.2.21]: https://github.com/markwharton/homebrew-plankit/compare/v0.2.20...v0.2.21
 [v0.2.22]: https://github.com/markwharton/homebrew-plankit/compare/v0.2.21...v0.2.22
 [v0.2.23]: https://github.com/markwharton/homebrew-plankit/compare/v0.2.22...v0.2.23
+[v0.2.24]: https://github.com/markwharton/homebrew-plankit/compare/v0.2.23...v0.2.24
