@@ -43,9 +43,9 @@ IMPORTANT: Follow these rules at all times.
 ### Branch & Release Flow
 
 - **Trunk flow:** one branch, `main`. Work lands on `main` and releases are cut there; there is no development branch and no merge step.
-- **Release:** on `main`, `pk changelog && pk release` (or `/plankit:ship`) — `pk release` tags HEAD and pushes `main` + tag atomically.
+- **Release:** on `main`, `pk changelog && pk release` (or `/plankit:ship`) — `pk release` tags HEAD and pushes `main` + tag atomically. Formula bumps are released this way by `bump-formulas.yml` itself (see CI/CD); a human runs it only for other work on `main`.
 - **`.pk.json`:** no `release.branch` (its absence selects trunk flow) and no `guard.branches` (a guard on `main` would block every commit). `pk status` shows an empty `release:` line; that is expected in trunk flow.
-- **Bump/Dependabot PRs: always squash-merge** (`gh pr merge --squash --delete-branch`), then `git pull --rebase` before shipping. Squashing lands the PR's conventional-commit title as one commit so `pk changelog` picks it up; a regular merge commit is non-conventional and silently drops the bump from the changelog.
+- **Dependabot PRs: always squash-merge** (`gh pr merge --squash --delete-branch`), then `git pull --rebase` before shipping. Squashing lands the PR's conventional-commit title as one commit so `pk changelog` picks it up; a regular merge commit is non-conventional and silently drops it from the changelog. There are no bump PRs any more — bumps land on `main` directly (see CI/CD).
 
 ### Commit Style
 
@@ -55,7 +55,9 @@ IMPORTANT: Follow these rules at all times.
 ### CI/CD
 
 - `formulas.yml` is the registry of tracked formulas (formula name, upstream repo, asset prefix) — new formulas must be added there for CI to cover them.
-- `.github/workflows/test-formulas.yml` — runs `scripts/test-formula.sh <formula>` (install → `--version` → `brew test` → `brew audit --new --except=version` → uninstall) for every registered formula on all four release platforms (macOS arm64 + Intel, Linux amd64 + arm64), for pushes/PRs touching `Formula/**` or the test tooling (`formulas.yml`, `scripts/`, the workflow itself).
-- `.github/workflows/bump-formulas.yml` — daily schedule, `repository_dispatch` (type `bump-formula`), or manual dispatch. Runs `scripts/bump-formula.rb` per formula, smoke-tests on macOS, opens a bump PR against `main`.
-- Auto-bump PRs use the default `GITHUB_TOKEN`, which cannot trigger other workflows — that's why the bump workflow smoke-tests before opening the PR; the full four-platform test runs when the merge lands on `main`.
+- `.github/workflows/test-formulas.yml` — runs `scripts/test-formula.sh <formula>` (install → `--version` → `brew test` → `brew audit --new --except=version` → uninstall) for every registered formula on all four release platforms (macOS arm64 + Intel, Linux amd64 + arm64), for pushes/PRs touching `Formula/**` or the test tooling (`formulas.yml`, `scripts/`, the workflow itself). Also a `workflow_call` (input `ref`) so the bump workflow runs the same matrix on its candidate commit.
+- `.github/workflows/bump-formulas.yml` — daily schedule, `repository_dispatch` (type `bump-formula`), or manual dispatch. One run carries an upstream release to a tap release with no human step: `bump` (serially per formula: `scripts/bump-formula.rb`, macOS smoke test, one `chore: bump <formula> to vX.Y.Z` commit each, pushed to `bump/run-<run_id>`) → `test` (the four-platform matrix on that exact commit) → `land` (fast-forward `main` to it through the refs API with `force=false`) → `release` (`pk ship` on `main`, using the linux-amd64 `pk` of the plankit release the tap now packages, verified against the sha256 the formula records) → `cleanup` (deletes the branch). Two formulas bumping in one run give two commits and one release.
+- Failure semantics: anything before `land` fails leaves `main` untouched (bad or missing checksum, a failing smoke test, any platform red, or a human push to `main` in the meantime, which makes the fast-forward refuse). A `release` failure leaves the bump on `main` without a tag — recover with "Re-run failed jobs" (`gh run rerun <id> --failed`) or `pk ship` by hand. A test failure is recovered by a fresh dispatch (the branch is gone).
+- Everything that workflow pushes uses `GITHUB_TOKEN`, which never triggers other workflows: the `push` trigger of `test-formulas.yml` fires only for human pushes, and nothing listens for tags. `main` has no branch protection or rulesets; adding any would block `land` unless the token may bypass it.
+- `workflow_dispatch` input `break_checksum` zeros every sha256 of the bumped formula on the candidate commit (after the smoke test) so the four-platform gate must fail and nothing lands — the way to re-verify the gate after touching the workflow.
 - Dependabot keeps GitHub Actions versions current (`.github/dependabot.yml`).
