@@ -1,28 +1,28 @@
 class Plankit < Formula
   desc "Plan-driven development toolkit for Claude Code"
   homepage "https://plankit.com/pk/"
-  version "1.8.1"
+  version "1.8.2"
   license "MIT"
 
   on_macos do
     on_arm do
       url "https://github.com/markwharton/plankit/releases/download/v#{version}/pk-darwin-arm64"
-      sha256 "5f1a4bf9d92c448e2ee217c236a51e92b85fdcca4400f9dedfcdf7c7e2ed17bf"
+      sha256 "3cfe3c75faaab791d831e70919989d456c09bf0b857e9fcf8b10490142fdb7b5"
     end
     on_intel do
       url "https://github.com/markwharton/plankit/releases/download/v#{version}/pk-darwin-amd64"
-      sha256 "b689ad1a9541db146496873e1cee4aa53ae8a1d3f93370c8e53e1af1a2829946"
+      sha256 "30db5332722ab78e99f5a35b1d8896255c732fedd2f2e115fc7c84f44f9503ba"
     end
   end
 
   on_linux do
     on_arm do
       url "https://github.com/markwharton/plankit/releases/download/v#{version}/pk-linux-arm64"
-      sha256 "8128d611898a41801448b7519ec71f42f7da8991521d98115e99e614edceaa2a"
+      sha256 "35a11b93f3e489b518788b2ba262e32159d476a220853d078a1d627fa4774de8"
     end
     on_intel do
       url "https://github.com/markwharton/plankit/releases/download/v#{version}/pk-linux-amd64"
-      sha256 "2a92ea1c716945a7c51ddc2e5df0548855a805378b6dcb331b2ffcb141003cb2"
+      sha256 "bfc6ffb59800a6cc7ca38810533dc5e31e1cf11ecc83c9f463d822b26604b33a"
     end
   end
 
