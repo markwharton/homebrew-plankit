@@ -1,7 +1,7 @@
 {
   "guard": {
     "mode": "block",
-    "push": "off"
+    "push": "ask"
   },
   "preserve": {
     "mode": "manual"
